@@ -9,12 +9,22 @@ import {
   UndoIcon,
 } from '@/components/icons';
 import { toast } from 'sonner';
-import { generateUUID } from '@/lib/utils';
+
+// Pyodide type declaration
+declare global {
+  interface Window {
+    loadPyodide: (config?: any) => Promise<any>;
+  }
+
+  var loadPyodide: (config?: any) => Promise<any>;
+}
+
 import {
   Console,
-  ConsoleOutput,
-  ConsoleOutputContent,
+  type ConsoleOutput,
+  type ConsoleOutputContent,
 } from '@/components/console';
+import { generateUUID } from '@/lib/utils';
 
 const OUTPUT_HANDLERS = {
   matplotlib: `
@@ -133,7 +143,11 @@ export const codeArtifact = new Artifact<'code', Metadata>({
         }));
 
         try {
-          // @ts-expect-error - loadPyodide is not defined
+          // Wait for Pyodide to be available
+          while (typeof globalThis.loadPyodide === 'undefined') {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+
           const currentPyodideInstance = await globalThis.loadPyodide({
             indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/',
           });

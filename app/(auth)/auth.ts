@@ -1,12 +1,12 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { createGuestUser, getUser } from '@/lib/db/queries';
+import { getUser } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
 
-export type UserType = 'guest' | 'regular';
+export type UserType = 'regular';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
@@ -62,14 +62,7 @@ export const {
         return { ...user, type: 'regular' };
       },
     }),
-    Credentials({
-      id: 'guest',
-      credentials: {},
-      async authorize() {
-        const [guestUser] = await createGuestUser();
-        return { ...guestUser, type: 'guest' };
-      },
-    }),
+    // Guest provider removed - login is now required
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -78,12 +71,17 @@ export const {
         token.type = user.type;
       }
 
+      // Ensure token has a type (fallback for existing tokens)
+      if (!token.type) {
+        token.type = 'regular';
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.type = token.type;
+        session.user.type = token.type || 'regular';
       }
 
       return session;

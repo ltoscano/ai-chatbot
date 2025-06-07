@@ -29,7 +29,7 @@ export function ModelSelector({
   const [optimisticModelId, setOptimisticModelId] =
     useOptimistic(selectedModelId);
 
-  const userType = session.user.type;
+  const userType = 'regular' as const; // Only regular users are allowed now
   const { availableChatModelIds } = entitlementsByUserType[userType];
 
   const availableChatModels = chatModels.filter((chatModel) =>
