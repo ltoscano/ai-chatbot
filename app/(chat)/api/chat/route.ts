@@ -36,6 +36,7 @@ import { after } from 'next/server';
 import type { Chat } from '@/lib/db/schema';
 import { differenceInSeconds } from 'date-fns';
 import { ChatSDKError } from '@/lib/errors';
+import { processAttachments } from '@/lib/utils/attachments';
 
 export const maxDuration = 60;
 
@@ -144,12 +145,31 @@ export async function POST(request: Request) {
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
 
+    // Process attachments for LOCAL_FS conversion
+    const processedMessages = await Promise.all(
+      messages.map(async (msg) => {
+        if (
+          msg.experimental_attachments &&
+          msg.experimental_attachments.length > 0
+        ) {
+          const processedAttachments = await processAttachments(
+            msg.experimental_attachments,
+          );
+          return {
+            ...msg,
+            experimental_attachments: processedAttachments,
+          };
+        }
+        return msg;
+      }),
+    );
+
     const stream = createDataStream({
       execute: (dataStream) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
-          messages,
+          messages: processedMessages,
           maxSteps: 5,
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning'
@@ -237,11 +257,14 @@ export async function POST(request: Request) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    
+
     console.error('Unexpected error in chat API:', error);
     return Response.json(
-      { code: 'server_error:chat', message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
+      {
+        code: 'server_error:chat',
+        message: 'Something went wrong. Please try again later.',
+      },
+      { status: 500 },
     );
   }
 }

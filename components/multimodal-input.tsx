@@ -136,8 +136,11 @@ function PureMultimodalInput({
     const formData = new FormData();
     formData.append('file', file);
 
+    // Usa una variabile d'ambiente per l'URL di upload, con fallback all'endpoint locale
+    const uploadUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || '/api/files/upload';
+
     try {
-      const response = await fetch('/api/files/upload', {
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
