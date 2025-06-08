@@ -19,6 +19,13 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
+import { ToolIcon } from './icons';
+
+// Leggi dalla variabile d'ambiente e converti in array
+const HIDDEN_TOOLS = (process.env.REACT_APP_HIDDEN_TOOLS || '')
+  .split(',')
+  .map((tool) => tool.trim())
+  .filter((tool) => tool.length > 0);
 
 const PurePreviewMessage = ({
   chatId,
@@ -190,6 +197,8 @@ const PurePreviewMessage = ({
 
                 if (state === 'result') {
                   const { result } = toolInvocation;
+                  // Nel componente
+                  const shouldShowResult = !HIDDEN_TOOLS.includes(toolName);
 
                   return (
                     <div key={toolCallId}>
@@ -212,11 +221,62 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
+                      ) : shouldShowResult ? (
+                        <div
+                          className="flex items-center gap-2"
+                          title={`Tool: ${toolName}`}
+                        >
+                          <ToolIcon />
+                        </div>
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
                     </div>
                   );
+
+                  // <div key={toolCallId}>
+                  //   {(() => {
+                  //     if (toolName === 'getWeather') {
+                  //       return <Weather weatherAtLocation={result} />;
+                  //     }
+
+                  //     if (toolName === 'createDocument') {
+                  //       return (
+                  //         <DocumentPreview
+                  //           isReadonly={isReadonly}
+                  //           result={result}
+                  //         />
+                  //       );
+                  //     }
+
+                  //     if (toolName === 'updateDocument') {
+                  //       return (
+                  //         <DocumentToolResult
+                  //           type="update"
+                  //           result={result}
+                  //           isReadonly={isReadonly}
+                  //         />
+                  //       );
+                  //     }
+
+                  //     if (toolName === 'requestSuggestions') {
+                  //       return (
+                  //         <DocumentToolResult
+                  //           type="request-suggestions"
+                  //           result={result}
+                  //           isReadonly={isReadonly}
+                  //         />
+                  //       );
+                  //     }
+
+                  //     if (!shouldShowResult) {
+                  //       return null; // Non mostra niente
+                  //     }
+
+                  //     // Default case per altri tool
+                  //     return <pre>{JSON.stringify(result, null, 2)}</pre>;
+                  //   })()}
+                  // </div>;
                 }
               }
             })}

@@ -5,4 +5,7 @@ https://chat-sdk.dev/docs/getting-started/setup
 3. configurazione .env.local
 4. pnpm install
 5. npm run db:migrate
-6. pnpm dev
+6. pnpm add @modelcontextprotocol/sdk
+7. pnpm add @langchain/community @langchain/core duck-duck-scrape exa-js
+8. pnpm devxw
+

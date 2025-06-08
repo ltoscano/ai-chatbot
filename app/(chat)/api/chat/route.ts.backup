@@ -5,7 +5,32 @@ import {
   smoothStream,
   streamText,
 } from 'ai';
-import { auth, type UserType } from '@/app/(auth)/auth';
+import { auth, type UserType } fro    // Process attachments for LOCAL_FS conversion
+    const processedMessages = await Promise.all(
+      messages.map(async (msg) => {
+        if (
+          msg.experimental_attachments &&
+          msg.experimental_attachments.length > 0
+        ) {
+          const processedAttachments = await processAttachments(
+            msg.experimental_attachments,
+          );
+          return {
+            ...msg,
+            experimental_attachments: processedAttachments,
+          };
+        }
+        return msg;
+      }),
+    );
+
+    // Initialize Exa client and tools
+    const exaClient = new ExaClient({
+      apiKey: process.env.EXA_API_KEY || '',
+    });
+    const exaTools = createAISDKTools(exaClient);
+
+    const stream = createDataStream({';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import {
   createStreamId,
@@ -173,13 +198,8 @@ export async function POST(request: Request) {
     );
 
     // Initialize Exa client and tools
-    const exaApiKey = process.env.EXASEARCH_API_KEY;
-    if (!exaApiKey) {
-      throw new Error('EXASEARCH_API_KEY environment variable is required');
-    }
-
     const exaClient = new ExaClient({
-      apiKey: exaApiKey,
+      apiKey: process.env.EXASEARCH_API_KEY || '',
     });
     const exaTools = createAISDKTools(exaClient);
 
@@ -189,8 +209,7 @@ export async function POST(request: Request) {
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: processedMessages,
-          maxSteps: 6,
-          // if not set, the default is all tools are active
+          maxSteps: 5,
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning'
               ? []
@@ -202,7 +221,7 @@ export async function POST(request: Request) {
                   // 'searchExa',
                   // 'searchExaWithContent',
                   // 'researchWithExa',
-                  'exa_search',
+                  'exa_search'
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -215,7 +234,7 @@ export async function POST(request: Request) {
               dataStream,
             }),
             exa_search: exaTools.exa_search,
-
+            
             // searchExa: searchExa,
             // searchExaWithContent: searchExaWithContent,
             // researchWithExa: researchWithExa,
