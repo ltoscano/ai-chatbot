@@ -70,7 +70,7 @@ interface QueryResult {
 }
 
 // Initialize Exa client
-const client = new Exa(process.env.EXASEARCH_API_KEY as string);
+const client = new Exa(process.env.EXA_API_KEY as string);
 
 // Search type enum
 const SearchType = z.enum(['neural', 'keyword', 'auto']);

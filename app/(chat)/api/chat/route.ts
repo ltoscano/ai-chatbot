@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     );
 
     // Initialize Exa client and tools
-    const exaApiKey = process.env.EXASEARCH_API_KEY;
+    const exaApiKey = process.env.EXA_API_KEY;
     if (!exaApiKey) {
       throw new Error('EXASEARCH_API_KEY environment variable is required');
     }
@@ -192,7 +192,8 @@ export async function POST(request: Request) {
           maxSteps: 6,
           // if not set, the default is all tools are active
           experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
+            selectedChatModel === 'chat-model-reasoning' ||
+            selectedChatModel === 'gemini-pro'
               ? []
               : [
                   'getWeather',
@@ -268,7 +269,8 @@ export async function POST(request: Request) {
           sendReasoning: true,
         });
       },
-      onError: () => {
+      onError: (error) => {
+        console.error('DataStream error:', error);
         return 'Oops, an error occurred!';
       },
     });

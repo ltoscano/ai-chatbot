@@ -17,4 +17,14 @@ export const chatModels: Array<ChatModel> = [
     name: 'Reasoning model',
     description: 'Uses advanced reasoning',
   },
+  {
+    id: 'gemini-pro',
+    name: 'Gemini Pro',
+    description: 'Google most capable model for complex reasoning',
+  },
+  {
+    id: 'claude-anthropic',
+    name: 'Anthropic Claude 4',
+    description: 'Anthropic’s most capable model for complex reasoning',
+  },
 ];

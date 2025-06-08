@@ -6,6 +6,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
+// Inizializza il keyvault all'avvio dell'applicazione
+import '@/lib/keyvault';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
   title: 'Next.js Chatbot Template',

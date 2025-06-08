@@ -20,6 +20,9 @@ importers:
       '@agentic/stdlib':
         specifier: ^7.6.7
         version: 7.6.7(googleapis@150.0.1)(zod@3.25.56)
+      '@ai-sdk/google-vertex':
+        specifier: ^2.2.24
+        version: 2.2.24(zod@3.25.56)
       '@ai-sdk/openai':
         specifier: ^1.3.22
         version: 1.3.22(zod@3.25.56)
@@ -46,7 +49,7 @@ importers:
         version: 6.37.1
       '@langchain/community':
         specifier: ^0.3.45
-        version: 0.3.45(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.52.0)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(zod@3.25.56))(@ibm-cloud/watsonx-ai@1.6.7)(@langchain/core@0.3.57(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56)))(@neondatabase/serverless@0.9.5)(@vercel/postgres@0.10.0)(axios@1.9.0)(duck-duck-scrape@2.2.7)(fast-xml-parser@5.2.4)(googleapis@150.0.1)(ibm-cloud-sdk-core@5.4.0)(ignore@5.3.2)(jsonwebtoken@9.0.2)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(playwright@1.52.0)(redis@5.5.6)(weaviate-client@3.6.0)(ws@8.18.2(bufferutil@4.0.9))
+        version: 0.3.45(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.52.0)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(zod@3.25.56))(@ibm-cloud/watsonx-ai@1.6.7)(@langchain/core@0.3.57(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56)))(@neondatabase/serverless@0.9.5)(@vercel/postgres@0.10.0)(axios@1.9.0)(duck-duck-scrape@2.2.7)(fast-xml-parser@5.2.4)(google-auth-library@9.15.1)(googleapis@150.0.1)(ibm-cloud-sdk-core@5.4.0)(ignore@5.3.2)(jsonwebtoken@9.0.2)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(playwright@1.52.0)(redis@5.5.6)(weaviate-client@3.6.0)(ws@8.18.2(bufferutil@4.0.9))
       '@langchain/core':
         specifier: ^0.3.57
         version: 0.3.57(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))
@@ -568,6 +571,24 @@ packages:
     resolution: {integrity: sha512-srUjqCenJb0kt7OtSrp+fS9XK0FsqMAftY+NNPcKNY76EbVC+I3hL7ykUG78Ox6L+45865MOnw2qUtkbAF9ZbA==}
     peerDependencies:
       zod: ^3.25.55
+
+  '@ai-sdk/anthropic@1.2.12':
+    resolution: {integrity: sha512-YSzjlko7JvuiyQFmI9RN1tNZdEiZxc+6xld/0tq/VkJaHpEzGAb1yiNxxvmYVcjvfu/PcvCxAAYXmTYQQ63IHQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/google-vertex@2.2.24':
+    resolution: {integrity: sha512-zi1ZN6jQEBRke/WMbZv0YkeqQ3nOs8ihxjVh/8z1tUn+S1xgRaYXf4+r6+Izh2YqVHIMNwjhUYryQRBGq20cgQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/google@1.2.19':
+    resolution: {integrity: sha512-Xgl6eftIRQ4srUdCzxM112JuewVMij5q4JLcNmHcB68Bxn9dpr3MVUSPlJwmameuiQuISIA8lMB+iRiRbFsaqA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
 
   '@ai-sdk/openai-compatible@0.2.14':
     resolution: {integrity: sha512-icjObfMCHKSIbywijaoLdZ1nSnuRnWgMEMLgwoxPJgxsUHMx0aVORnsLUid4SPtdhHI3X2masrt6iaEQLvOSFw==}
@@ -3829,9 +3850,17 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
+  gaxios@6.7.1:
+    resolution: {integrity: sha512-LDODD4TMYx7XXdpwxAVRAIAuB0bzv0s+ywFonY46k126qzQHT9ygyoa9tncmOiQmmDrik65UYsEkv3lbfqQ3yQ==}
+    engines: {node: '>=14'}
+
   gaxios@7.0.0-rc.6:
     resolution: {integrity: sha512-osVFpgeBiwTM2AVI9MXvb8iWzM6oSMbTVWc65Gm5BgBlE+nUA6PBHFMaYpqjZx1AhUH7aPOZq78WcRAM6hhAwA==}
     engines: {node: '>=18'}
+
+  gcp-metadata@6.1.1:
+    resolution: {integrity: sha512-a4tiq7E0/5fTjxPAaH4jpjkSv/uCaU2p5KC6HVGrvl0cDjA8iBZv4vv1gyzlmK0ZUKqwpOyQMKzZQe3lTit77A==}
+    engines: {node: '>=14'}
 
   gcp-metadata@7.0.0-rc.1:
     resolution: {integrity: sha512-E6c+AdIaK1LNA839OyotiTca+B2IG1nDlMjnlcck8JjXn3fVgx57Ib9i6iL1/iqN7bA3EUQdcRRu+HqOCOABIg==}
@@ -3902,6 +3931,14 @@ packages:
     resolution: {integrity: sha512-WC9wfEKK0bk3seWKsDn2loduLth6JWKTsrbWftzrhPuzpwnVXb5oi2+aa0JDBxLBDdkGesLvTQ67F2nZ7leq1Q==}
     engines: {node: '>=18'}
 
+  google-auth-library@9.15.1:
+    resolution: {integrity: sha512-Jb6Z0+nvECVz+2lzSMt9u98UsoakXxA2HGHMCxh+so3n90XgYWkq5dur19JAJV7ONiJY22yBTyJB1TSkvPq9Ng==}
+    engines: {node: '>=14'}
+
+  google-logging-utils@0.0.2:
+    resolution: {integrity: sha512-NEgUnEcBiP5HrPzufUkBzJOD/Sxsco3rLNo1F1TNf7ieU8ryUzBhqba8r756CjLX7rn3fHl6iLEwPYuqpoKgQQ==}
+    engines: {node: '>=14'}
+
   google-logging-utils@1.1.1:
     resolution: {integrity: sha512-rcX58I7nqpu4mbKztFeOAObbomBbHU2oIb/d3tJfF3dizGSApqtSwYJigGCooHdnMyQBIw8BrWyK96w3YXgr6A==}
     engines: {node: '>=14'}
@@ -3929,6 +3966,10 @@ packages:
   graphql@16.11.0:
     resolution: {integrity: sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
+
+  gtoken@7.1.0:
+    resolution: {integrity: sha512-pCcEwRi+TKpMlxAQObHDQ56KawURgyAf6jtIY046fJ5tIv3zDe/LEIubckAO8fj6JnAxLdmWkUfNyulQ2iKdEw==}
+    engines: {node: '>=14.0.0'}
 
   gtoken@8.0.0-rc.1:
     resolution: {integrity: sha512-UjE/egX6ixArdcCKOkheuFQ4XN4/0gX92nd2JPVEYuRU2sWHAWuOVGnowm1fQUdQtaxqn1n8H0hOb2LCaUhJ3A==}
@@ -4144,6 +4185,10 @@ packages:
   is-shared-array-buffer@1.0.4:
     resolution: {integrity: sha512-ISWac8drv4ZGfwKl5slpHG9OwPNty4jOWPRIhBpxOoD+hqITiwuipOQ2bNthAzwA3B4fIjO4Nln74N0S9byq8A==}
     engines: {node: '>= 0.4'}
+
+  is-stream@2.0.1:
+    resolution: {integrity: sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg==}
+    engines: {node: '>=8'}
 
   is-string@1.1.1:
     resolution: {integrity: sha512-BtEeSsoaQjlSPBemMQIrY1MY0uM6vnS1g5fmufYOtnxLGUZM2178PKbhsk7Ffv58IX+ZtcvoGwccYsh0PglkAA==}
@@ -6468,6 +6513,30 @@ snapshots:
       - babel-plugin-macros
       - debug
 
+  '@ai-sdk/anthropic@1.2.12(zod@3.25.56)':
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.56)
+      zod: 3.25.56
+
+  '@ai-sdk/google-vertex@2.2.24(zod@3.25.56)':
+    dependencies:
+      '@ai-sdk/anthropic': 1.2.12(zod@3.25.56)
+      '@ai-sdk/google': 1.2.19(zod@3.25.56)
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.56)
+      google-auth-library: 9.15.1
+      zod: 3.25.56
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  '@ai-sdk/google@1.2.19(zod@3.25.56)':
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.56)
+      zod: 3.25.56
+
   '@ai-sdk/openai-compatible@0.2.14(zod@3.25.56)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
@@ -7117,7 +7186,7 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@langchain/community@0.3.45(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.52.0)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(zod@3.25.56))(@ibm-cloud/watsonx-ai@1.6.7)(@langchain/core@0.3.57(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56)))(@neondatabase/serverless@0.9.5)(@vercel/postgres@0.10.0)(axios@1.9.0)(duck-duck-scrape@2.2.7)(fast-xml-parser@5.2.4)(googleapis@150.0.1)(ibm-cloud-sdk-core@5.4.0)(ignore@5.3.2)(jsonwebtoken@9.0.2)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(playwright@1.52.0)(redis@5.5.6)(weaviate-client@3.6.0)(ws@8.18.2(bufferutil@4.0.9))':
+  '@langchain/community@0.3.45(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.52.0)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(zod@3.25.56))(@ibm-cloud/watsonx-ai@1.6.7)(@langchain/core@0.3.57(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56)))(@neondatabase/serverless@0.9.5)(@vercel/postgres@0.10.0)(axios@1.9.0)(duck-duck-scrape@2.2.7)(fast-xml-parser@5.2.4)(google-auth-library@9.15.1)(googleapis@150.0.1)(ibm-cloud-sdk-core@5.4.0)(ignore@5.3.2)(jsonwebtoken@9.0.2)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(playwright@1.52.0)(redis@5.5.6)(weaviate-client@3.6.0)(ws@8.18.2(bufferutil@4.0.9))':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.52.0)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@5.1.1(ws@8.18.2(bufferutil@4.0.9))(zod@3.25.56))(zod@3.25.56)
       '@ibm-cloud/watsonx-ai': 1.6.7
@@ -7141,6 +7210,7 @@ snapshots:
       '@vercel/postgres': 0.10.0
       duck-duck-scrape: 2.2.7
       fast-xml-parser: 5.2.4
+      google-auth-library: 9.15.1
       googleapis: 150.0.1
       ignore: 5.3.2
       jsonwebtoken: 9.0.2
@@ -9356,12 +9426,32 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
+  gaxios@6.7.1:
+    dependencies:
+      extend: 3.0.2
+      https-proxy-agent: 7.0.6
+      is-stream: 2.0.1
+      node-fetch: 2.7.0
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
   gaxios@7.0.0-rc.6:
     dependencies:
       extend: 3.0.2
       https-proxy-agent: 7.0.6
       node-fetch: 3.3.2
     transitivePeerDependencies:
+      - supports-color
+
+  gcp-metadata@6.1.1:
+    dependencies:
+      gaxios: 6.7.1
+      google-logging-utils: 0.0.2
+      json-bigint: 1.0.0
+    transitivePeerDependencies:
+      - encoding
       - supports-color
 
   gcp-metadata@7.0.0-rc.1:
@@ -9472,6 +9562,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  google-auth-library@9.15.1:
+    dependencies:
+      base64-js: 1.5.1
+      ecdsa-sig-formatter: 1.0.11
+      gaxios: 6.7.1
+      gcp-metadata: 6.1.1
+      gtoken: 7.1.0
+      jws: 4.0.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  google-logging-utils@0.0.2: {}
+
   google-logging-utils@1.1.1: {}
 
   googleapis-common@8.0.2-rc.0:
@@ -9504,6 +9608,14 @@ snapshots:
       - encoding
 
   graphql@16.11.0: {}
+
+  gtoken@7.1.0:
+    dependencies:
+      gaxios: 6.7.1
+      jws: 4.0.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   gtoken@8.0.0-rc.1:
     dependencies:
@@ -9752,6 +9864,8 @@ snapshots:
   is-shared-array-buffer@1.0.4:
     dependencies:
       call-bound: 1.0.4
+
+  is-stream@2.0.1: {}
 
   is-string@1.1.1:
     dependencies:
