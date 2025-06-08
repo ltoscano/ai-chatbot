@@ -6,7 +6,15 @@
 import { getConfig, isConfigInitialized, initializeConfig } from './index';
 
 // Esporta anche le funzioni dal modulo principale per convenience
-export { isConfigInitialized, initializeConfig, getConfig, getAllConfigs, setConfig, removeConfig, reinitializeConfig } from './index';
+export {
+  isConfigInitialized,
+  initializeConfig,
+  getConfig,
+  getAllConfigs,
+  setConfig,
+  removeConfig,
+  reinitializeConfig,
+} from './index';
 
 /**
  * Interfaccia per le credenziali Vertex AI (primo elemento dell'array)
@@ -54,7 +62,10 @@ export function getVertexAIConfig(): VertexAIConfig | null {
     const config = getConfig('VERTEX_AI_1');
     return config || null;
   } catch (error) {
-    console.error('❌ Errore nel recupero della configurazione Vertex AI:', error);
+    console.error(
+      '❌ Errore nel recupero della configurazione Vertex AI:',
+      error,
+    );
     return null;
   }
 }
@@ -62,7 +73,9 @@ export function getVertexAIConfig(): VertexAIConfig | null {
 /**
  * Ottiene l'array completo Vertex AI
  */
-export function getVertexAIArray(): [VertexAICredentials, VertexAIConfig] | null {
+export function getVertexAIArray():
+  | [VertexAICredentials, VertexAIConfig]
+  | null {
   try {
     const fullArray = getConfig('VERTEX_AI');
     if (Array.isArray(fullArray) && fullArray.length >= 2) {
@@ -70,7 +83,10 @@ export function getVertexAIArray(): [VertexAICredentials, VertexAIConfig] | null
     }
     return null;
   } catch (error) {
-    console.error('❌ Errore nel recupero dell\'array Vertex AI completo:', error);
+    console.error(
+      "❌ Errore nel recupero dell'array Vertex AI completo:",
+      error,
+    );
     return null;
   }
 }
@@ -102,9 +118,12 @@ export function getGoogleAPIKey(): string | null {
 export function getAzureOpenAIConfig() {
   return {
     apiKey: getConfig('AZURE_OPENAI_API_KEY') || getConfig('AZURE_OAI_API_KEY'),
-    endpoint: getConfig('AZURE_OPENAI_ENDPOINT') || getConfig('AZURE_OAI_ENDPOINT'),
-    apiVersion: getConfig('openai_api_version') || getConfig('AZURE_OAI_API_VERSION'),
-    deployment: getConfig('azure_deployment') || getConfig('AZURE_OAI_DEPLOYMENT_GPT'),
+    endpoint:
+      getConfig('AZURE_OPENAI_ENDPOINT') || getConfig('AZURE_OAI_ENDPOINT'),
+    apiVersion:
+      getConfig('openai_api_version') || getConfig('AZURE_OAI_API_VERSION'),
+    deployment:
+      getConfig('azure_deployment') || getConfig('AZURE_OAI_DEPLOYMENT_GPT'),
     embeddingsDeployment: getConfig('AZURE_OAI_DEPLOYMENT_EMBEDDINGS'),
   };
 }
@@ -215,11 +234,7 @@ export function validateEssentialConfigs(): {
   missing: string[];
   available: string[];
 } {
-  const essentialKeys = [
-    'OPENAI_API_KEY',
-    'VERTEX_AI',
-    'ANTHROPIC_KEY',
-  ];
+  const essentialKeys = ['OPENAI_API_KEY', 'VERTEX_AI', 'ANTHROPIC_KEY'];
 
   const missing: string[] = [];
   const available: string[] = [];
@@ -245,23 +260,23 @@ export function validateEssentialConfigs(): {
  */
 export function printConfigReport(): void {
   console.log('\n📊 REPORT CONFIGURAZIONI KEYVAULT');
-  console.log('=' .repeat(50));
-  
+  console.log('='.repeat(50));
+
   if (!isConfigInitialized()) {
     console.log('⚠️ Configurazioni non ancora inizializzate');
     return;
   }
 
   const validation = validateEssentialConfigs();
-  
+
   console.log(`✅ Configurazioni disponibili: ${validation.available.length}`);
-  validation.available.forEach(key => {
+  validation.available.forEach((key) => {
     console.log(`   ✓ ${key}`);
   });
 
   if (validation.missing.length > 0) {
     console.log(`❌ Configurazioni mancanti: ${validation.missing.length}`);
-    validation.missing.forEach(key => {
+    validation.missing.forEach((key) => {
       console.log(`   ✗ ${key}`);
     });
   }
@@ -279,5 +294,5 @@ export function printConfigReport(): void {
     console.log('🔧 Azure OpenAI: Configurato correttamente');
   }
 
-// Esporta anche le funzioni dal modulo principale per convenience
-export { isConfigInitialized, initializeConfig, getConfig, getAllConfigs, setConfig, removeConfig, reinitializeConfig } from './index';
+  console.log('='.repeat(50));
+}
