@@ -24,6 +24,7 @@ import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { mcpHub } from '@/lib/ai/tools/mcp-hub';
+import { getMcpTools } from '@/lib/ai/mcp-dynamic-tools';
 // import {
 //   searchExa,
 //   searchExaWithContent,
@@ -185,7 +186,27 @@ export async function POST(request: Request) {
     const exaTools = createAISDKTools(exaClient);
 
     const stream = createDataStream({
-      execute: (dataStream) => {
+      execute: async (dataStream) => {
+        // Scopre e registra dinamicamente i tool MCP come tool nativi
+        console.log('🔍 Discovering MCP tools for this chat session...');
+        const mcpTools = await getMcpTools();
+        const mcpToolNames = Object.keys(mcpTools);
+
+        console.log(`📋 Available MCP tools: ${mcpToolNames.join(', ')}`);
+
+        // Lista base dei tool attivi
+        const baseActiveTools = [
+          'getWeather',
+          'createDocument',
+          'updateDocument',
+          'requestSuggestions',
+          'exa_search',
+          'mcpHub',
+        ];
+
+        // Combina tool base e MCP tool (con cast per TypeScript)
+        const allActiveTools = [...baseActiveTools, ...mcpToolNames] as any[];
+
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
@@ -196,17 +217,7 @@ export async function POST(request: Request) {
             selectedChatModel === 'chat-model-reasoning' ||
             selectedChatModel === 'gemini-pro'
               ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                  // 'searchExa',
-                  // 'searchExaWithContent',
-                  // 'researchWithExa',
-                  'exa_search',
-                  'mcpHub',
-                ],
+              : allActiveTools,
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
@@ -219,6 +230,8 @@ export async function POST(request: Request) {
             }),
             exa_search: exaTools.exa_search,
             mcpHub,
+            // Aggiungi dinamicamente i tool MCP scoperti
+            ...mcpTools,
 
             // searchExa: searchExa,
             // searchExaWithContent: searchExaWithContent,
