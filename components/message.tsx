@@ -20,6 +20,7 @@ import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { ToolIcon } from './icons';
+import { McpHubResult } from './mcp-hub-result';
 
 // Leggi dalla variabile d'ambiente e converti in array
 const HIDDEN_TOOLS = (process.env.REACT_APP_HIDDEN_TOOLS || '')
@@ -190,6 +191,11 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'mcpHub' ? (
+                        <div className="flex items-center gap-2 text-blue-600">
+                          <ToolIcon />
+                          <span>Connecting to MCP Hub...</span>
+                        </div>
                       ) : null}
                     </div>
                   );
@@ -221,6 +227,8 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'mcpHub' ? (
+                        <McpHubResult result={result} />
                       ) : shouldShowResult ? (
                         <div
                           className="flex items-center gap-2"

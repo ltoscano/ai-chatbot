@@ -17,6 +17,9 @@ importers:
       '@agentic/exa':
         specifier: ^7.6.7
         version: 7.6.7(zod@3.25.56)
+      '@agentic/mcp':
+        specifier: ^7.6.7
+        version: 7.6.7(zod@3.25.56)
       '@agentic/stdlib':
         specifier: ^7.6.7
         version: 7.6.7(googleapis@150.0.1)(zod@3.25.56)

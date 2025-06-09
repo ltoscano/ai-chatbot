@@ -23,6 +23,7 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { mcpHub } from '@/lib/ai/tools/mcp-hub';
 // import {
 //   searchExa,
 //   searchExaWithContent,
@@ -204,6 +205,7 @@ export async function POST(request: Request) {
                   // 'searchExaWithContent',
                   // 'researchWithExa',
                   'exa_search',
+                  'mcpHub',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -216,6 +218,7 @@ export async function POST(request: Request) {
               dataStream,
             }),
             exa_search: exaTools.exa_search,
+            mcpHub,
 
             // searchExa: searchExa,
             // searchExaWithContent: searchExaWithContent,
