@@ -28,7 +28,22 @@ export function McpHubResult({ result }: McpHubResultProps) {
     message,
   } = result;
 
+  // Check if we should show simplified messages
+  const showRawResponse =
+    process.env.NEXT_PUBLIC_MCP_HUB_SHOW_RAW_RESPONSE !== 'FALSE';
+
   if (!success) {
+    if (!showRawResponse) {
+      return (
+        <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-700 font-semibold mb-2">
+            <XCircle size={16} />
+            MCP Hub caught error
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="border border-red-200 bg-red-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-red-700 font-semibold mb-2">
@@ -43,6 +58,17 @@ export function McpHubResult({ result }: McpHubResultProps) {
   }
 
   if (action === 'list_tools' && tools) {
+    if (!showRawResponse) {
+      return (
+        <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+            <List size={16} />
+            Examining MCP Hub with ({tools.length}) tools
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
@@ -65,6 +91,17 @@ export function McpHubResult({ result }: McpHubResultProps) {
   }
 
   if (action === 'call_tool' && tool_name) {
+    if (!showRawResponse) {
+      return (
+        <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-green-700 font-semibold mb-3">
+            <CheckCircle size={16} />
+            MCP Hub using {tool_name}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="border border-green-200 bg-green-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-green-700 font-semibold mb-3">
