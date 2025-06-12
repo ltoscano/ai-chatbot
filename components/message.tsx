@@ -21,6 +21,7 @@ import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { ToolIcon } from './icons';
 import { McpHubResult } from './mcp-hub-result';
+import { ToolResult } from './tool-result';
 
 // Leggi dalla variabile d'ambiente e converti in array
 const HIDDEN_TOOLS = (process.env.REACT_APP_HIDDEN_TOOLS || '')
@@ -229,6 +230,8 @@ const PurePreviewMessage = ({
                         />
                       ) : toolName === 'mcpHub' ? (
                         <McpHubResult result={result} />
+                      ) : toolName.startsWith('mcp_') ? (
+                        <ToolResult result={result} toolName={toolName} />
                       ) : shouldShowResult ? (
                         <div
                           className="flex items-center gap-2"

@@ -25,7 +25,7 @@ function createTransport(url: string) {
 async function getMcpClient(url: string): Promise<Client> {
   let client = mcpClientCache.get(url);
 
-  if (!client || !client.transport?.isConnected) {
+  if (!client) {
     client = new Client(
       {
         name: 'mcp-dynamic-discovery',
@@ -135,23 +135,39 @@ export async function discoverAndRegisterMcpTools(): Promise<
                 result.content.length === 1 &&
                 result.content[0].type === 'text'
               ) {
-                return result.content[0].text;
+                return {
+                  success: true,
+                  result: result.content[0].text,
+                  message: `Successfully executed MCP tool: ${mcpTool.name}`,
+                };
               }
               return {
+                success: true,
                 content: result.content,
                 message: `Successfully executed MCP tool: ${mcpTool.name}`,
               };
             }
 
-            return `Tool ${mcpTool.name} executed successfully`;
+            return {
+              success: true,
+              result: `Tool ${mcpTool.name} executed successfully`,
+              message: `Successfully executed MCP tool: ${mcpTool.name}`,
+            };
           } catch (error) {
             console.error(
               `❌ Error executing MCP tool ${mcpTool.name}:`,
               error,
             );
-            throw new Error(
-              `Failed to execute MCP tool ${mcpTool.name}: ${error.message}`,
-            );
+
+            // Invece di lanciare un'eccezione, ritorniamo un oggetto di errore
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            return {
+              success: false,
+              error: errorMessage,
+              toolName: mcpTool.name,
+              message: `Failed to execute MCP tool ${mcpTool.name}: ${errorMessage}`,
+            };
           }
         },
       });

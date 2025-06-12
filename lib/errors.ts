@@ -73,6 +73,27 @@ export class ChatSDKError extends Error {
   }
 }
 
+export class ToolError extends Error {
+  public toolName: string;
+  public originalError?: Error;
+
+  constructor(toolName: string, message: string, originalError?: Error) {
+    super(message);
+    this.name = 'ToolError';
+    this.toolName = toolName;
+    this.originalError = originalError;
+  }
+
+  toErrorResult() {
+    return {
+      success: false,
+      error: this.message,
+      toolName: this.toolName,
+      message: `Tool ${this.toolName} failed: ${this.message}`,
+    };
+  }
+}
+
 export function getMessageByErrorCode(errorCode: ErrorCode): string {
   if (errorCode.includes('database')) {
     return 'An error occurred while executing a database query.';

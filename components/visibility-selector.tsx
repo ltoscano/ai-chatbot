@@ -15,6 +15,7 @@ import {
   GlobeIcon,
   LockIcon,
   MenuIcon,
+  ToolIcon,
 } from './icons';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { toast } from './toast';
@@ -76,7 +77,7 @@ export function VisibilitySelector({
       if (result.success) {
         toast({
           type: 'success',
-          description: 'MCP tools cache invalidated successfully',
+          description: 'MCP tools cache refreshed successfully',
         });
       } else {
         toast({
@@ -153,7 +154,7 @@ export function VisibilitySelector({
               size="sm"
               className="hidden md:flex md:px-2 md:h-[34px]"
             >
-              <MenuIcon size={16} />
+              <ToolIcon size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -164,7 +165,7 @@ export function VisibilitySelector({
               <div className="flex flex-col gap-1">
                 <span>Hub Refresh</span>
                 <span className="text-xs text-muted-foreground">
-                  Invalidate MCP tools cache
+                  Rediscovery MCP tools and resources
                 </span>
               </div>
             </DropdownMenuItem>

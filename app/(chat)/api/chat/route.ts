@@ -211,7 +211,7 @@ export async function POST(request: Request) {
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: processedMessages,
-          maxSteps: 6,
+          maxSteps: 10,
           // if not set, the default is all tools are active
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning' ||
