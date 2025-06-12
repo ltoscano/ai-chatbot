@@ -14,7 +14,22 @@ export function CodeBlock({
   children,
   ...props
 }: CodeBlockProps) {
-  if (!inline) {
+  // Estrai il contenuto testuale per verificare se è una sola riga
+  const textContent =
+    typeof children === 'string'
+      ? children
+      : Array.isArray(children)
+        ? children.join('')
+        : String(children);
+
+  // Verifica se il contenuto è di una sola riga (senza newlines)
+  const isSingleLine =
+    !textContent.includes('\n') && textContent.trim().length > 0;
+
+  // Se non è inline ma è una sola riga, trattalo come inline
+  const shouldRenderAsInline = inline || (!inline && isSingleLine);
+
+  if (!shouldRenderAsInline) {
     return (
       <div className="not-prose flex flex-col">
         <div
