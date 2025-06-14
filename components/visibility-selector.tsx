@@ -14,11 +14,12 @@ import {
   ChevronDownIcon,
   GlobeIcon,
   LockIcon,
-  MenuIcon,
   ToolIcon,
+  FileIcon,
 } from './icons';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { toast } from './toast';
+import { ProjectsDialog } from './projects-dialog';
 
 export type VisibilityType = 'private' | 'public';
 
@@ -52,6 +53,8 @@ export function VisibilitySelector({
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
   const [hubMenuOpen, setHubMenuOpen] = useState(false);
+  const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId,
@@ -92,6 +95,23 @@ export function VisibilitySelector({
       toast({
         type: 'error',
         description: 'Failed to invalidate MCP tools cache',
+      });
+    }
+  };
+
+  const handleProjectSelect = (projectId: string | null) => {
+    setCurrentProjectId(projectId);
+    setHubMenuOpen(false);
+
+    if (projectId) {
+      toast({
+        type: 'success',
+        description: `Project selected: ${projectId}`,
+      });
+    } else {
+      toast({
+        type: 'success',
+        description: 'Project selection cleared',
       });
     }
   };
@@ -169,9 +189,35 @@ export function VisibilitySelector({
                 </span>
               </div>
             </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setProjectsDialogOpen(true)}
+              className="cursor-pointer"
+            >
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <FileIcon size={14} />
+                  <span>Projects</span>
+                  {currentProjectId && (
+                    <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">
+                      {currentProjectId}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Manage and select projects for tool operations
+                </span>
+              </div>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+
+      <ProjectsDialog
+        open={projectsDialogOpen}
+        onOpenChange={setProjectsDialogOpen}
+        onProjectSelect={handleProjectSelect}
+        currentProjectId={currentProjectId}
+      />
     </div>
   );
 }
