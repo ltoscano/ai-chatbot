@@ -30,6 +30,7 @@ export const postRequestBodySchema = z.object({
     'claude-anthropic',
   ]),
   selectedVisibilityType: z.enum(['public', 'private']),
+  currentProjectId: z.string().optional().nullable(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

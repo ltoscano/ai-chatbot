@@ -19,6 +19,7 @@ import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useAutoResume } from '@/hooks/use-auto-resume';
+import { useCurrentProject } from '@/hooks/use-current-project';
 import { ChatSDKError } from '@/lib/errors';
 
 export function Chat({
@@ -39,6 +40,7 @@ export function Chat({
   autoResume: boolean;
 }) {
   const { mutate } = useSWRConfig();
+  const { currentProjectId } = useCurrentProject();
 
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -64,12 +66,20 @@ export function Chat({
     sendExtraMessageFields: true,
     generateId: generateUUID,
     fetch: fetchWithErrorHandlers,
-    experimental_prepareRequestBody: (body) => ({
-      id,
-      message: body.messages.at(-1),
-      selectedChatModel: initialChatModel,
-      selectedVisibilityType: visibilityType,
-    }),
+    experimental_prepareRequestBody: (body) => {
+      const payload = {
+        id,
+        message: body.messages.at(-1),
+        selectedChatModel: initialChatModel,
+        selectedVisibilityType: visibilityType,
+        currentProjectId: currentProjectId,
+      };
+      console.log(
+        '🚀 Chat - Sending payload:',
+        JSON.stringify(payload, null, 2),
+      );
+      return payload;
+    },
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },

@@ -115,7 +115,7 @@ function PureMultimodalInput({
   const submitForm = useCallback(async () => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
-    // Sincronizza il progetto con il server se c'è un currentProjectId
+    // Sincronizza il progetto con il server solo se c'è un currentProjectId valido
     if (currentProjectId) {
       await syncProjectToServer(chatId, currentProjectId);
     }

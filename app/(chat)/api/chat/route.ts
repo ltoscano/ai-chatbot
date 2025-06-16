@@ -77,14 +77,33 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json();
+    console.log(
+      '📥 Chat API - Received payload:',
+      JSON.stringify(json, null, 2),
+    );
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+    console.log('✅ Chat API - Schema validation passed');
+  } catch (error) {
+    console.error('❌ Chat API - Schema validation failed:', error);
+    console.error(
+      '❌ Chat API - Received data:',
+      JSON.stringify(
+        await request.json().catch(() => 'Failed to parse JSON'),
+        null,
+        2,
+      ),
+    );
     return new ChatSDKError('bad_request:api').toResponse();
   }
 
   try {
-    const { id, message, selectedChatModel, selectedVisibilityType } =
-      requestBody;
+    const {
+      id,
+      message,
+      selectedChatModel,
+      selectedVisibilityType,
+      currentProjectId,
+    } = requestBody;
 
     const session = await auth();
 
@@ -139,6 +158,7 @@ export async function POST(request: Request) {
       country,
       userId: session.user.id,
       userName: session.user.email || 'unknown-user',
+      currentProjectId: currentProjectId || 'not-set',
     };
 
     await saveMessages({

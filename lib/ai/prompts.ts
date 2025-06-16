@@ -60,6 +60,7 @@ export interface RequestHints {
   country: Geo['country'];
   userId?: string;
   userName?: string;
+  currentProjectId?: string;
 }
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
@@ -70,6 +71,7 @@ About the origin of user's request:
 - country: ${requestHints.country}
 - userId: ${requestHints.userId || 'not-available'}
 - userName: ${requestHints.userName ? formatUserName(requestHints.userName) : 'not-available'}
+- currentProjectId: ${requestHints.currentProjectId || 'not-set'}
 `;
 
 export const systemPrompt = ({
