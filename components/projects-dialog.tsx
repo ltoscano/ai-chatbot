@@ -65,7 +65,7 @@ export function ProjectsDialog({
 }: ProjectsDialogProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('projects');
 
@@ -432,59 +432,61 @@ export function ProjectsDialog({
     }
   }, [open, currentProjectId]);
 
-  // Pulisce i file selezionati quando cambia il progetto selezionato
+  // Pulisce il file selezionato quando cambia il progetto selezionato
   useEffect(() => {
-    setSelectedFiles([]);
+    setSelectedFile('');
   }, [selectedProject]);
 
   // Renderizza l'albero dei file con possibilità di selezionare ed eliminare
   const renderFileTree = (node: FileTreeNode, level = 0) => {
     const isFile = node.type === 'file';
-    const isSelected = selectedFiles.includes(node.path);
+    const isSelected = selectedFile === node.path;
 
     return (
       <div key={node.path} className={cn('ml-4', level === 0 && 'ml-0')}>
         <div
           className={cn(
-            'flex items-center gap-2 py-1 px-2 rounded group hover:bg-muted/50',
+            'flex items-start gap-2 py-1 px-2 rounded group hover:bg-muted/50',
             isFile && 'cursor-pointer',
             isSelected && 'bg-blue-50 border border-blue-200',
           )}
           onClick={() => {
             if (isFile) {
-              setSelectedFiles((prev) =>
-                prev.includes(node.path)
-                  ? prev.filter((path) => path !== node.path)
-                  : [...prev, node.path],
-              );
+              setSelectedFile(isSelected ? '' : node.path);
             }
           }}
         >
-          {node.type === 'directory' ? (
-            <div className="text-blue-600">📁</div>
-          ) : (
-            <FileIcon size={16} />
-          )}
-          <span className="text-sm flex-1">{node.name}</span>
-          {node.type === 'file' && node.size && (
-            <Badge variant="outline" className="text-xs">
-              {Math.round(node.size / 1024)}KB
-            </Badge>
-          )}
-          {isFile && isSelected && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                setFileToDelete(node.path);
-                setShowDeleteFileDialog(true);
-              }}
-            >
-              <TrashIcon size={12} />
-            </Button>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0 w-6 mt-0.5">
+            {node.type === 'directory' ? (
+              <div className="text-blue-600">📁</div>
+            ) : (
+              <FileIcon size={16} />
+            )}
+          </div>
+          <div className="w-32 flex-shrink-0">
+            <span className="text-sm block break-words">{node.name}</span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+            {node.type === 'file' && node.size && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(node.size / 1024)}KB
+              </Badge>
+            )}
+            {isFile && isSelected && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFileToDelete(node.path);
+                  setShowDeleteFileDialog(true);
+                }}
+              >
+                <TrashIcon size={12} />
+              </Button>
+            )}
+          </div>
         </div>
         {node.children && (
           <div className="ml-4">
@@ -702,36 +704,18 @@ export function ProjectsDialog({
                               <CardTitle className="text-base">
                                 File Tree
                               </CardTitle>
-                              {selectedFiles.length > 0 && (
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {selectedFiles.length} selected
-                                  </Badge>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setSelectedFiles([])}
-                                  >
-                                    Clear
-                                  </Button>
-                                </div>
-                              )}
                             </div>
-                            {selectedFiles.length > 0 && (
+                            {selectedFile && (
                               <p className="text-xs text-muted-foreground">
-                                Click on files to select/deselect them. Selected
-                                files will show a delete button.
+                                Click on a file to select it. Selected file will
+                                show a delete button.
                               </p>
                             )}
-                            {selectedFiles.length === 0 &&
-                              selectedProject?.file_tree && (
-                                <p className="text-xs text-muted-foreground">
-                                  Click on files to select them for deletion.
-                                </p>
-                              )}
+                            {!selectedFile && selectedProject?.file_tree && (
+                              <p className="text-xs text-muted-foreground">
+                                Click on a file to select it for deletion.
+                              </p>
+                            )}
                           </CardHeader>
                           <CardContent>
                             <ScrollArea className="h-64">
@@ -977,9 +961,7 @@ export function ProjectsDialog({
               onClick={() => {
                 if (fileToDelete && selectedProject) {
                   deleteFile(selectedProject.project_name, fileToDelete);
-                  setSelectedFiles((prev) =>
-                    prev.filter((path) => path !== fileToDelete),
-                  );
+                  setSelectedFile('');
                 }
                 setShowDeleteFileDialog(false);
                 setFileToDelete(null);
