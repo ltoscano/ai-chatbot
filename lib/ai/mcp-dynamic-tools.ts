@@ -12,6 +12,40 @@ let dynamicToolsCache: Record<string, any> | null = null;
 let lastDiscoveryTime = 0;
 const DISCOVERY_CACHE_TTL = 5 * 60 * 1000; // 5 minuti
 
+// Timer per refresh automatico
+let autoRefreshTimer: NodeJS.Timeout | null = null;
+
+// Funzione per avviare il refresh automatico
+function startAutoRefresh() {
+  // Cancella il timer esistente se presente
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+  }
+
+  // Avvia un nuovo timer che refresha ogni 5 minuti
+  autoRefreshTimer = setInterval(async () => {
+    console.log('🕐 Auto-refresh: refreshing MCP tools cache...');
+    try {
+      invalidateMcpToolsCache();
+      await discoverAndRegisterMcpTools();
+      console.log('✅ Auto-refresh completed successfully');
+    } catch (error) {
+      console.error('❌ Auto-refresh failed:', error);
+    }
+  }, DISCOVERY_CACHE_TTL);
+
+  console.log('⏰ Auto-refresh timer started (every 5 minutes)');
+}
+
+// Funzione per fermare il refresh automatico
+function stopAutoRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+    console.log('⏹️ Auto-refresh timer stopped');
+  }
+}
+
 // Funzione per determinare se stiamo usando un provider OpenAI
 function isOpenAIProvider(): boolean {
   // Controlla se l'applicazione sta usando modelli OpenAI
@@ -479,6 +513,11 @@ export async function discoverAndRegisterMcpTools(): Promise<
       );
     }
 
+    // Avvia l'auto-refresh se non è già attivo
+    if (!autoRefreshTimer) {
+      startAutoRefresh();
+    }
+
     return dynamicTools;
   } catch (error) {
     console.error('❌ Failed to discover MCP tools:', error);
@@ -633,3 +672,6 @@ export async function getMcpToolsCompatibilityReport(): Promise<{
     };
   }
 }
+
+// Esporta le funzioni di gestione auto-refresh
+export { startAutoRefresh, stopAutoRefresh };

@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -55,6 +55,8 @@ export function VisibilitySelector({
   const [hubMenuOpen, setHubMenuOpen] = useState(false);
   const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [mcpToolsCount, setMcpToolsCount] = useState<number | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId,
@@ -66,36 +68,61 @@ export function VisibilitySelector({
     [visibilityType],
   );
 
-  const handleHubRefresh = async () => {
+  // Funzione per caricare il conteggio dei tool MCP
+  const loadMcpToolsCount = async (forceRefresh = false) => {
     try {
-      const response = await fetch('/api/mcp/invalidate-cache', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const url = forceRefresh
+        ? '/api/mcp/tools-count?refresh=true'
+        : '/api/mcp/tools-count';
+      const response = await fetch(url);
       const result = await response.json();
 
       if (result.success) {
-        toast({
-          type: 'success',
-          description: 'MCP tools cache refreshed successfully',
-        });
+        setMcpToolsCount(result.count);
       } else {
-        toast({
-          type: 'error',
-          description: result.message || 'Failed to invalidate MCP tools cache',
-        });
+        console.warn('Failed to load MCP tools count:', result.message);
+        setMcpToolsCount(null);
       }
+    } catch (error) {
+      console.error('Error loading MCP tools count:', error);
+      setMcpToolsCount(null);
+    }
+  };
+
+  // Carica il conteggio all'inizializzazione del componente
+  useEffect(() => {
+    loadMcpToolsCount();
+
+    // Aggiorna il conteggio ogni 30 secondi per riflettere eventuali cambiamenti
+    // dal refresh automatico dei tool
+    const interval = setInterval(() => {
+      loadMcpToolsCount(false); // Non forza il refresh, solo aggiorna l'UI
+    }, 30000); // 30 secondi
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleHubRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Usa direttamente l'endpoint con refresh=true che invalida la cache e ricarica
+      console.log('🔄 Starting Hub Refresh...');
+      await loadMcpToolsCount(true);
+
+      toast({
+        type: 'success',
+        description: `MCP tools refreshed successfully`,
+      });
 
       setHubMenuOpen(false);
     } catch (error) {
-      console.error('Error invalidating cache:', error);
+      console.error('Error refreshing MCP tools:', error);
       toast({
         type: 'error',
-        description: 'Failed to invalidate MCP tools cache',
+        description: 'Failed to refresh MCP tools',
       });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -181,9 +208,17 @@ export function VisibilitySelector({
             <DropdownMenuItem
               onClick={handleHubRefresh}
               className="cursor-pointer"
+              disabled={isRefreshing}
             >
               <div className="flex flex-col gap-1">
-                <span>Hub Refresh</span>
+                <span>
+                  Hub Refresh
+                  {isRefreshing
+                    ? ' (refreshing...)'
+                    : mcpToolsCount !== null
+                      ? ` (${mcpToolsCount})`
+                      : ''}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   Rediscovery MCP tools and resources
                 </span>
