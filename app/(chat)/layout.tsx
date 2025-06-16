@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { CurrentProjectProvider } from '@/hooks/use-current-project';
 import { auth } from '../(auth)/auth';
 import Script from 'next/script';
 
@@ -22,8 +23,10 @@ export default async function Layout({
         strategy="beforeInteractive"
       />
       <SidebarProvider defaultOpen={!isCollapsed}>
-        <AppSidebar user={session?.user} />
-        <SidebarInset>{children}</SidebarInset>
+        <CurrentProjectProvider>
+          <AppSidebar user={session?.user} />
+          <SidebarInset>{children}</SidebarInset>
+        </CurrentProjectProvider>
       </SidebarProvider>
     </>
   );

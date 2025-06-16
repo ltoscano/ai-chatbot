@@ -1,6 +1,24 @@
 import type { ArtifactKind } from '@/components/artifact';
 import type { Geo } from '@vercel/functions';
 
+const formatUserName = (userName: string): string => {
+  // Se è un'email, estrai la parte prima del @
+  if (userName.includes('@')) {
+    const localPart = userName.split('@')[0];
+
+    // Rimuovi i punti e dividi in parole
+    const words = localPart.split('.');
+
+    // Capitalizza la prima lettera di ogni parola
+    return words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  // Se non è un'email, capitalizza semplicemente la prima lettera
+  return userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase();
+};
+
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
 
@@ -33,13 +51,15 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+  'You are a friendly assistant! Keep your responses concise and helpful. When using tools that require user identification, use the provided userId and userName from the context.';
 
 export interface RequestHints {
   latitude: Geo['latitude'];
   longitude: Geo['longitude'];
   city: Geo['city'];
   country: Geo['country'];
+  userId?: string;
+  userName?: string;
 }
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
@@ -48,6 +68,8 @@ About the origin of user's request:
 - lon: ${requestHints.longitude}
 - city: ${requestHints.city}
 - country: ${requestHints.country}
+- userId: ${requestHints.userId || 'not-available'}
+- userName: ${requestHints.userName ? formatUserName(requestHints.userName) : 'not-available'}
 `;
 
 export const systemPrompt = ({

@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useMemo, useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import {
   FileIcon,
 } from './icons';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { useCurrentProject } from '@/hooks/use-current-project';
 import { toast } from './toast';
 import { ProjectsDialog } from './projects-dialog';
 
@@ -54,10 +56,16 @@ export function VisibilitySelector({
   const [open, setOpen] = useState(false);
   const [hubMenuOpen, setHubMenuOpen] = useState(false);
   const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [mcpToolsCount, setMcpToolsCount] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const { data: session } = useSession();
+  const {
+    currentProjectId,
+    setCurrentProjectId,
+    syncProjectToServer,
+    loadProjectFromServer,
+  } = useCurrentProject();
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId,
     initialVisibilityType: selectedVisibilityType,
@@ -102,6 +110,19 @@ export function VisibilitySelector({
     return () => clearInterval(interval);
   }, []);
 
+  // Carica il currentProjectId dal server quando viene aperta una chat
+  useEffect(() => {
+    if (session?.user?.id && chatId) {
+      console.log('VisibilitySelector: Loading project for chat', chatId);
+      loadProjectFromServer(chatId);
+    } else {
+      console.log(
+        'VisibilitySelector: No session or chatId, resetting project',
+      );
+      setCurrentProjectId(null);
+    }
+  }, [chatId, session?.user?.id, loadProjectFromServer, setCurrentProjectId]);
+
   const handleHubRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -126,11 +147,13 @@ export function VisibilitySelector({
     }
   };
 
-  const handleProjectSelect = (projectId: string | null) => {
+  const handleProjectSelect = async (projectId: string | null) => {
     setCurrentProjectId(projectId);
     setHubMenuOpen(false);
 
+    // Salva la mappatura chatId -> projectId sul server
     if (projectId) {
+      await syncProjectToServer(chatId, projectId);
       toast({
         type: 'success',
         description: `Project selected: ${projectId}`,

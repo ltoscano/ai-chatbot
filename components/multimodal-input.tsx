@@ -26,6 +26,7 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
+import { useCurrentProject } from '@/hooks/use-current-project';
 import type { VisibilityType } from './visibility-selector';
 
 function PureMultimodalInput({
@@ -109,8 +110,15 @@ function PureMultimodalInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
 
-  const submitForm = useCallback(() => {
+  const { currentProjectId, syncProjectToServer } = useCurrentProject();
+
+  const submitForm = useCallback(async () => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
+
+    // Sincronizza il progetto con il server se c'è un currentProjectId
+    if (currentProjectId) {
+      await syncProjectToServer(chatId, currentProjectId);
+    }
 
     handleSubmit(undefined, {
       experimental_attachments: attachments,
@@ -130,6 +138,8 @@ function PureMultimodalInput({
     setLocalStorageInput,
     width,
     chatId,
+    currentProjectId,
+    syncProjectToServer,
   ]);
 
   const uploadFile = async (file: File) => {
@@ -240,6 +250,7 @@ function PureMultimodalInput({
         multiple
         onChange={handleFileChange}
         tabIndex={-1}
+        aria-label="File upload"
       />
 
       {(attachments.length > 0 || uploadQueue.length > 0) && (
