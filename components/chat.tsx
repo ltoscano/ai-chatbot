@@ -74,11 +74,35 @@ export function Chat({
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
+      console.error('Chat error:', error);
+
       if (error instanceof ChatSDKError) {
         toast({
           type: 'error',
           description: error.message,
         });
+      } else {
+        // Handle other types of errors, including MCP schema errors
+        const errorMessage =
+          error?.message || error?.toString() || 'Unknown error';
+
+        if (
+          errorMessage.includes('object schema missing properties') ||
+          errorMessage.includes('invalid schema') ||
+          errorMessage.includes('schema validation')
+        ) {
+          toast({
+            type: 'error',
+            description:
+              'Si è verificato un errore nella validazione dello schema dei tool MCP. Questo problema è noto con OpenAI GPT-4o. Ti consiglio di provare con un modello Anthropic se disponibile.',
+          });
+        } else {
+          toast({
+            type: 'error',
+            description:
+              "Si è verificato un errore durante l'elaborazione della tua richiesta. Riprova tra poco.",
+          });
+        }
       }
     },
   });

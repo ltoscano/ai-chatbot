@@ -94,6 +94,84 @@ export class ToolError extends Error {
   }
 }
 
+export class McpSchemaError extends Error {
+  public toolName: string;
+  public schema: any;
+  public originalError?: Error;
+
+  constructor(
+    toolName: string,
+    schema: any,
+    message: string,
+    originalError?: Error,
+  ) {
+    super(message);
+    this.name = 'McpSchemaError';
+    this.toolName = toolName;
+    this.schema = schema;
+    this.originalError = originalError;
+  }
+
+  toErrorResult() {
+    return {
+      success: false,
+      error: 'schema_validation_error',
+      toolName: this.toolName,
+      message: `Il tool MCP ${this.toolName} ha uno schema non compatibile con OpenAI GPT-4o. ${this.message}`,
+      details: {
+        schema: this.schema,
+        originalError: this.originalError?.message,
+      },
+    };
+  }
+}
+
+export class McpToolError extends Error {
+  public toolName: string;
+  public mcpError?: Error;
+  public schemaIssue?: boolean;
+
+  constructor(
+    toolName: string,
+    message: string,
+    options?: {
+      mcpError?: Error;
+      schemaIssue?: boolean;
+    },
+  ) {
+    super(message);
+    this.name = 'McpToolError';
+    this.toolName = toolName;
+    this.mcpError = options?.mcpError;
+    this.schemaIssue = options?.schemaIssue || false;
+  }
+
+  toErrorResult() {
+    return {
+      success: false,
+      error: this.message,
+      toolName: this.toolName,
+      schemaIssue: this.schemaIssue,
+      message: `MCP Tool ${this.toolName} failed: ${this.message}`,
+    };
+  }
+
+  toResponse() {
+    const statusCode = this.schemaIssue ? 400 : 500;
+    const code = this.schemaIssue ? 'bad_request:chat' : 'server_error:chat';
+
+    return Response.json(
+      {
+        code,
+        message: this.message,
+        toolName: this.toolName,
+        schemaIssue: this.schemaIssue,
+      },
+      { status: statusCode },
+    );
+  }
+}
+
 export function getMessageByErrorCode(errorCode: ErrorCode): string {
   if (errorCode.includes('database')) {
     return 'An error occurred while executing a database query.';

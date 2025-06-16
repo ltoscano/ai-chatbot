@@ -415,10 +415,10 @@ export function ProjectsDialog({
     onProjectSelect(null);
     setSelectedProject(null);
     setUploadFiles(null);
-    toast({
-      type: 'success',
-      description: 'Project selection cleared',
-    });
+    // toast({
+    //   type: 'success',
+    //   description: 'Project selection cleared',
+    // });
   };
 
   // Effetto per caricare i progetti all'apertura

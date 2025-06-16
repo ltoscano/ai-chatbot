@@ -200,7 +200,7 @@ export async function POST(request: Request) {
           'createDocument',
           'updateDocument',
           'requestSuggestions',
-          'exa_search',
+          // 'exa_search',
           'mcpHub',
         ];
 
@@ -214,10 +214,7 @@ export async function POST(request: Request) {
           maxSteps: 10,
           // if not set, the default is all tools are active
           experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning' ||
-            selectedChatModel === 'gemini-pro'
-              ? []
-              : allActiveTools,
+            selectedChatModel === 'chat-model-reasoning' ? [] : allActiveTools,
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
@@ -228,7 +225,7 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
-            exa_search: exaTools.exa_search,
+            // exa_search: exaTools.exa_search,
             mcpHub,
             // Aggiungi dinamicamente i tool MCP scoperti
             ...mcpTools,
@@ -285,9 +282,33 @@ export async function POST(request: Request) {
           sendReasoning: true,
         });
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error('DataStream error:', error);
-        return 'Oops, an error occurred!';
+
+        // Check if it's a schema validation error from OpenAI
+        const errorMessage =
+          error?.message || error?.toString() || 'Unknown error';
+
+        if (
+          errorMessage.includes('object schema missing properties') ||
+          errorMessage.includes('invalid schema') ||
+          errorMessage.includes('schema validation')
+        ) {
+          console.error('Schema validation error detected:', {
+            message: errorMessage,
+            cause: error?.cause,
+            stack: error?.stack,
+          });
+
+          return (
+            'Si è verificato un errore nella validazione dello schema dei tool MCP. ' +
+            'Questo problema è noto con OpenAI GPT-4o e stiamo lavorando per risolverlo. ' +
+            'Ti consiglio di provare con un modello Anthropic se disponibile.'
+          );
+        }
+
+        // Generic error fallback
+        return "Si è verificato un errore durante l'elaborazione della tua richiesta. Riprova tra poco.";
       },
     });
 
