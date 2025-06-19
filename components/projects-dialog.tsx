@@ -67,6 +67,7 @@ export function ProjectsDialog({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isIngesting, setIsIngesting] = useState(false);
   const [activeTab, setActiveTab] = useState('projects');
 
   // Form states
@@ -399,6 +400,52 @@ export function ProjectsDialog({
     }
   };
 
+  // Genera knowledge base del progetto
+  const ingestProject = async (projectName: string) => {
+    setIsIngesting(true);
+    try {
+      const response = await fetch(
+        `${serverUrl}/index/${userId}/${encodeURIComponent(projectName)}`,
+        {
+          method: 'POST',
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success || response.ok) {
+        toast({
+          type: 'success',
+          description: 'Project knowledge base generated successfully',
+        });
+      } else {
+        toast({
+          type: 'error',
+          description: data.error || 'Failed to generate knowledge base',
+        });
+      }
+    } catch (error) {
+      console.error('Error generating knowledge base:', error);
+      toast({
+        type: 'error',
+        description: 'Failed to generate knowledge base',
+      });
+    } finally {
+      setIsIngesting(false);
+    }
+  };
+
+  // Controlla se il file tree ha almeno un file
+  const hasFilesInTree = (node: FileTreeNode): boolean => {
+    if (node.type === 'file') {
+      return true;
+    }
+    if (node.children) {
+      return node.children.some((child) => hasFilesInTree(child));
+    }
+    return false;
+  };
+
   // Seleziona un progetto come corrente
   const selectProject = (projectName: string) => {
     onProjectSelect(projectName);
@@ -704,6 +751,28 @@ export function ProjectsDialog({
                               <CardTitle className="text-base">
                                 File Tree
                               </CardTitle>
+                              {selectedProject?.file_tree &&
+                                hasFilesInTree(selectedProject.file_tree) && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      ingestProject(
+                                        selectedProject.project_name,
+                                      )
+                                    }
+                                    disabled={isIngesting}
+                                  >
+                                    {isIngesting ? (
+                                      <>
+                                        <LoaderIcon size={14} />
+                                        Ingesting...
+                                      </>
+                                    ) : (
+                                      'Ingest'
+                                    )}
+                                  </Button>
+                                )}
                             </div>
                             {selectedFile && (
                               <p className="text-xs text-muted-foreground">
