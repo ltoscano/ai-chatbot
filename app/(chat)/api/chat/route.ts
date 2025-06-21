@@ -24,6 +24,7 @@ import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { mcpHub } from '@/lib/ai/tools/mcp-hub';
+import { searchKnowledgeBase } from '@/lib/ai/tools/search-knowledge-base';
 import { getMcpTools } from '@/lib/ai/mcp-dynamic-tools';
 // import {
 //   searchExa,
@@ -228,6 +229,7 @@ export async function POST(request: Request) {
           'requestSuggestions',
           // 'exa_search',
           'mcpHub',
+          'searchKnowledgeBase',
         ];
 
         // Combina tool base e MCP tool (con cast per TypeScript)
@@ -253,6 +255,7 @@ export async function POST(request: Request) {
             }),
             // exa_search: exaTools.exa_search,
             mcpHub,
+            searchKnowledgeBase,
             // Aggiungi dinamicamente i tool MCP scoperti
             ...mcpTools,
 
