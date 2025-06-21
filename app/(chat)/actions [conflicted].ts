@@ -34,27 +34,12 @@ export async function generateTitleFromUserMessage({
 }
 
 export async function deleteTrailingMessages({ id }: { id: string }) {
-  try {
-    const messages = await getMessageById({ id });
-    
-    if (!messages || messages.length === 0) {
-      throw new Error(`Message with id ${id} not found`);
-    }
-    
-    const message = messages[0];
-    
-    if (!message.chatId || !message.createdAt) {
-      throw new Error(`Invalid message data for id ${id}`);
-    }
+  const [message] = await getMessageById({ id });
 
-    await deleteMessagesByChatIdAfterTimestamp({
-      chatId: message.chatId,
-      timestamp: message.createdAt,
-    });
-  } catch (error) {
-    console.error('Error in deleteTrailingMessages:', error);
-    throw error;
-  }
+  await deleteMessagesByChatIdAfterTimestamp({
+    chatId: message.chatId,
+    timestamp: message.createdAt,
+  });
 }
 
 export async function updateChatVisibility({

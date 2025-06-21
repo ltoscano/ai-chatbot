@@ -178,12 +178,16 @@ export async function POST(request: Request) {
     await createStreamId({ streamId, chatId: id });
 
     // Process attachments for LOCAL_FS conversion
+    console.log(`[DEBUG ROUTE] LOCAL_FS: ${process.env.LOCAL_FS}`);
+    console.log(`[DEBUG ROUTE] NEXT_PUBLIC_INTRA_CONTAINER_IMAGE_URL: ${process.env.NEXT_PUBLIC_INTRA_CONTAINER_IMAGE_URL}`);
+    
     const processedMessages = await Promise.all(
       messages.map(async (msg) => {
         if (
           msg.experimental_attachments &&
           msg.experimental_attachments.length > 0
         ) {
+          console.log(`[DEBUG ROUTE] Processing ${msg.experimental_attachments.length} attachments`);
           const processedAttachments = await processAttachments(
             msg.experimental_attachments,
           );

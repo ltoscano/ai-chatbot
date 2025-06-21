@@ -8,12 +8,31 @@ import { auth } from '@/app/(auth)/auth';
 const FileSchema = z.object({
   file: z
     .instanceof(Blob)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: 'File size should be less than 5MB',
+    .refine((file) => file.size <= 500 * 1024 * 1024, {
+      message: 'File size should be less than 500MB',
     })
-    // Update the file type based on the kind of files you want to accept
-    .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
-      message: 'File type should be JPEG or PNG',
+    // Support more file types for project uploads
+    .refine((file) => {
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'text/plain',
+        'application/json',
+        'application/javascript',
+        'application/typescript',
+        'text/html',
+        'text/css',
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/octet-stream',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      return allowedTypes.includes(file.type) || file.type.startsWith('text/');
+    }, {
+      message: 'File type not supported for upload',
     }),
 });
 
@@ -40,7 +59,7 @@ export async function POST(request: Request) {
 
     if (!validatedFile.success) {
       const errorMessage = validatedFile.error.errors
-        .map((error) => error.message)
+        .map((error: any) => error.message)
         .join(', ');
 
       return NextResponse.json({ error: errorMessage }, { status: 400 });

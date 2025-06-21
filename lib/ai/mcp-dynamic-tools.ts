@@ -97,6 +97,29 @@ async function getMcpClient(url: string): Promise<Client> {
   return client;
 }
 
+// Funzione per gestire la riconnessione in caso di errore di sessione
+async function handleSessionError(url: string): Promise<Client> {
+  console.log('🔄 Session error detected, clearing cache and reconnecting...');
+  
+  // Rimuovi il client dalla cache per forzare una nuova connessione
+  mcpClientCache.delete(url);
+  
+  // Crea un nuovo client con una nuova sessione
+  return await getMcpClient(url);
+}
+
+// Funzione per verificare se un errore è relativo a una sessione invalida
+function isSessionError(error: any): boolean {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  
+  return (
+    errorMessage.includes('Bad Request: No valid session ID provided') ||
+    errorMessage.includes('HTTP 400') && errorMessage.includes('session') ||
+    errorMessage.includes('session ID') ||
+    errorMessage.includes('invalid session')
+  );
+}
+
 // Converte il JSON Schema in Zod Schema con compatibilità OpenAI e Anthropic
 function jsonSchemaToZod(jsonSchema: any): z.ZodType<any> {
   if (!jsonSchema || typeof jsonSchema !== 'object') {
@@ -381,8 +404,21 @@ export async function discoverAndRegisterMcpTools(): Promise<
   try {
     console.log('🔍 Discovering MCP tools from:', mcpHubUrl);
 
-    const client = await getMcpClient(mcpHubUrl);
-    const response = await client.listTools();
+    let client = await getMcpClient(mcpHubUrl);
+    let response;
+    
+    try {
+      response = await client.listTools();
+    } catch (error) {
+      // Gestisci errori di sessione invalida
+      if (isSessionError(error)) {
+        console.log('🔄 Session expired, attempting reconnection...');
+        client = await handleSessionError(mcpHubUrl);
+        response = await client.listTools();
+      } else {
+        throw error;
+      }
+    }
 
     console.log(`📦 Found ${response.tools.length} MCP tools`);
 
@@ -426,10 +462,25 @@ export async function discoverAndRegisterMcpTools(): Promise<
               const { _openai_compat, _error_fallback, ...cleanParameters } =
                 parameters;
 
-              const result = await client.callTool({
-                name: mcpTool.name,
-                arguments: cleanParameters,
-              });
+              let result;
+              try {
+                result = await client.callTool({
+                  name: mcpTool.name,
+                  arguments: cleanParameters,
+                });
+              } catch (toolError) {
+                // Gestisci errori di sessione durante l'esecuzione del tool
+                if (isSessionError(toolError)) {
+                  console.log('🔄 Session expired during tool execution, reconnecting...');
+                  const newClient = await handleSessionError(mcpHubUrl);
+                  result = await newClient.callTool({
+                    name: mcpTool.name,
+                    arguments: cleanParameters,
+                  });
+                } else {
+                  throw toolError;
+                }
+              }
 
               console.log(`✅ MCP tool ${mcpTool.name} executed successfully`);
 
@@ -547,6 +598,19 @@ export function invalidateMcpToolsCache(): void {
   dynamicToolsCache = null;
   lastDiscoveryTime = 0;
   console.log('🗑️ MCP tools cache invalidated');
+}
+
+// Funzione per pulire forzatamente la cache MCP e le connessioni
+export function forceResetMcpConnections(): void {
+  console.log('🔄 Force resetting all MCP connections...');
+  
+  // Pulisci la cache dei tool dinamici
+  invalidateMcpToolsCache();
+  
+  // Pulisci la cache dei client MCP
+  mcpClientCache.clear();
+  
+  console.log('✅ All MCP connections and caches cleared');
 }
 
 // Funzione per testare la connessione e i tool MCP

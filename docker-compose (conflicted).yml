@@ -1,20 +1,4 @@
 services:
-  nginx:
-    image: nginx:alpine
-    container_name: ai-chatbot-nginx
-    hostname: ai-chatbot-nginx
-    restart: unless-stopped
-    ports:
-      - "3000:3000" # Nginx takes over port 3000
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app
-      - blob-server
-      # - mcphub
-    networks:
-      - carl_default
-
   postgres:
     image: postgres:15-alpine
     container_name: ai-chatbot-postgres
@@ -48,47 +32,28 @@ services:
     restart: unless-stopped
     env_file:
       - .env.local
-    expose:
-      - "3000" # Only internal exposure, nginx handles external access
+      #environment:
+      # Sovrascrive specifiche variabili per Docker
+      #- POSTGRES_URL=postgresql://postgres:postgres_password@postgres:5432/ai_chatbot
+      #- PROJECTS_URL_SERVER=http://blob-server:8000
+      #- NEXT_PUBLIC_UPLOAD_URL=http://blob-server:8000/api/files/upload
+    ports:
+      - "3000:3000"
     volumes:
       # Mount source code only in development
       - ${PWD}:/app:cached
       - /app/node_modules
-      - /app/.next
+      - ai_chatbot_next:/app/.next
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - carl_default
     command: ${DOCKER_COMMAND:-npm run dev}
-  blob-server:
-    build: .
-    container_name: blob-server
-    hostname: blob-server
-    restart: unless-stopped
-    expose:
-      - "3000"
-    volumes:
-      - blob_data:/data
-    networks:
-      - carl_default
-    environment:
-      - PORT=3000
-  # mcphub:
-  #   image: samanhappy/mcphub:0.8.0
-  #   container_name: mcphub
-  #   hostname: mcphub
-  #   restart: unless-stopped
-  #   expose:
-  #     - "3000"
-  #   networks:
-  #     - carl_default
-  #   # environment:
-  #   #   - PORT=3000
 
 volumes:
   postgres_data:
-  blob_data:
+  ai_chatbot_next:
 
 
 networks:

@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      target: production
+    environment:
+      - NODE_ENV=production
+    volumes: [] # Remove source code mount for production
+    command: node server.js

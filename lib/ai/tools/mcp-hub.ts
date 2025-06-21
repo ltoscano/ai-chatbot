@@ -51,6 +51,29 @@ async function getMcpClient(url: string): Promise<Client> {
   return client;
 }
 
+// Funzione per gestire la riconnessione in caso di errore di sessione
+async function handleSessionError(url: string): Promise<Client> {
+  console.log('🔄 Session error detected, clearing cache and reconnecting...');
+  
+  // Rimuovi il client dalla cache per forzare una nuova connessione
+  mcpClientCache.delete(url);
+  
+  // Crea un nuovo client con una nuova sessione
+  return await getMcpClient(url);
+}
+
+// Funzione per verificare se un errore è relativo a una sessione invalida
+function isSessionError(error: any): boolean {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  
+  return (
+    errorMessage.includes('Bad Request: No valid session ID provided') ||
+    errorMessage.includes('HTTP 400') && errorMessage.includes('session') ||
+    errorMessage.includes('session ID') ||
+    errorMessage.includes('invalid session')
+  );
+}
+
 export const mcpHub = tool({
   description:
     'Connect to an MCP (Model Context Protocol) hub to access remote tools and services using FastMCP',
@@ -103,11 +126,23 @@ export const mcpHub = tool({
     }
 
     try {
-      const client = await getMcpClient(mcpHubUrl);
+      let client = await getMcpClient(mcpHubUrl);
 
       switch (action) {
         case 'list_tools': {
-          const response = await client.listTools();
+          let response;
+          try {
+            response = await client.listTools();
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired, attempting reconnection...');
+              client = await handleSessionError(mcpHubUrl);
+              response = await client.listTools();
+            } else {
+              throw error;
+            }
+          }
+          
           const tools = response.tools.map((tool) => ({
             name: tool.name,
             description: tool.description || 'No description available',
@@ -127,10 +162,24 @@ export const mcpHub = tool({
             throw new Error('tool_name is required for call_tool action');
           }
 
-          const result = await client.callTool({
-            name: tool_name,
-            arguments: tool_parameters || {},
-          });
+          let result;
+          try {
+            result = await client.callTool({
+              name: tool_name,
+              arguments: tool_parameters || {},
+            });
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired during tool execution, reconnecting...');
+              client = await handleSessionError(mcpHubUrl);
+              result = await client.callTool({
+                name: tool_name,
+                arguments: tool_parameters || {},
+              });
+            } else {
+              throw error;
+            }
+          }
 
           return {
             success: true,
@@ -142,7 +191,19 @@ export const mcpHub = tool({
         }
 
         case 'list_resources': {
-          const response = await client.listResources();
+          let response;
+          try {
+            response = await client.listResources();
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired, attempting reconnection...');
+              client = await handleSessionError(mcpHubUrl);
+              response = await client.listResources();
+            } else {
+              throw error;
+            }
+          }
+          
           const resources = response.resources.map((resource) => ({
             uri: resource.uri,
             name: resource.name || 'Unnamed resource',
@@ -165,7 +226,18 @@ export const mcpHub = tool({
             );
           }
 
-          const result = await client.readResource({ uri: resource_uri });
+          let result;
+          try {
+            result = await client.readResource({ uri: resource_uri });
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired during resource read, reconnecting...');
+              client = await handleSessionError(mcpHubUrl);
+              result = await client.readResource({ uri: resource_uri });
+            } else {
+              throw error;
+            }
+          }
 
           return {
             success: true,
@@ -177,7 +249,19 @@ export const mcpHub = tool({
         }
 
         case 'list_prompts': {
-          const response = await client.listPrompts();
+          let response;
+          try {
+            response = await client.listPrompts();
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired, attempting reconnection...');
+              client = await handleSessionError(mcpHubUrl);
+              response = await client.listPrompts();
+            } else {
+              throw error;
+            }
+          }
+          
           const prompts = response.prompts.map((prompt) => ({
             name: prompt.name,
             description: prompt.description || 'No description available',
@@ -197,10 +281,24 @@ export const mcpHub = tool({
             throw new Error('prompt_name is required for get_prompt action');
           }
 
-          const result = await client.getPrompt({
-            name: prompt_name,
-            arguments: prompt_arguments || {},
-          });
+          let result;
+          try {
+            result = await client.getPrompt({
+              name: prompt_name,
+              arguments: prompt_arguments || {},
+            });
+          } catch (error) {
+            if (isSessionError(error)) {
+              console.log('🔄 Session expired during prompt retrieval, reconnecting...');
+              client = await handleSessionError(mcpHubUrl);
+              result = await client.getPrompt({
+                name: prompt_name,
+                arguments: prompt_arguments || {},
+              });
+            } else {
+              throw error;
+            }
+          }
 
           return {
             success: true,
@@ -218,12 +316,14 @@ export const mcpHub = tool({
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 
-      // In caso di errore di connessione, rimuovi dalla cache per forzare riconnessione
+      // In caso di errore di connessione o sessione, rimuovi dalla cache per forzare riconnessione
       if (
         errorMessage.includes('connection') ||
         errorMessage.includes('timeout') ||
-        errorMessage.includes('transport')
+        errorMessage.includes('transport') ||
+        isSessionError(errorMessage)
       ) {
+        console.log('🗑️ Removing client from cache due to connection/session error');
         mcpClientCache.delete(mcpHubUrl);
       }
 

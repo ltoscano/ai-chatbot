@@ -405,7 +405,7 @@ export function ProjectsDialog({
     setIsIngesting(true);
     try {
       const response = await fetch(
-        `${serverUrl}/index/${userId}/${encodeURIComponent(projectName)}`,
+        `${serverUrl}/project/index/${userId}/${encodeURIComponent(projectName)}`,
         {
           method: 'POST',
         },
