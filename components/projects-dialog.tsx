@@ -28,7 +28,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { FileIcon, PlusIcon, TrashIcon, LoaderIcon } from './icons';
+import { FileIcon, PlusIcon, TrashIcon, LoaderIcon, UploadIcon } from './icons';
 import { cn } from '@/lib/utils';
 import { toast } from './toast';
 
@@ -47,6 +47,7 @@ interface FileTreeNode {
   path: string;
   size?: number;
   extension?: string;
+  indexed?: boolean;
   children?: FileTreeNode[];
 }
 
@@ -156,7 +157,7 @@ export function ProjectsDialog({
           tree_text: data.tree,
         };
         setSelectedProject(project);
-        setActiveTab('files');
+        // Non passare automaticamente al tab files
       } else {
         toast({
           type: 'error',
@@ -451,6 +452,8 @@ export function ProjectsDialog({
     onProjectSelect(projectName);
     // Carica automaticamente i dettagli del progetto selezionato
     loadProjectDetails(projectName);
+    // Passa automaticamente al tab Files quando si seleziona un progetto
+    setActiveTab('files');
     // toast({
     //   type: 'success',
     //   description: `Project "${projectName}" selected`,
@@ -462,6 +465,10 @@ export function ProjectsDialog({
     onProjectSelect(null);
     setSelectedProject(null);
     setUploadFiles(null);
+    // Se eravamo nel tab Files, torniamo al tab Projects
+    if (activeTab === 'files') {
+      setActiveTab('projects');
+    }
     // toast({
     //   type: 'success',
     //   description: 'Project selection cleared',
@@ -503,11 +510,19 @@ export function ProjectsDialog({
             }
           }}
         >
-          <div className="flex items-center gap-2 flex-shrink-0 w-6 mt-0.5">
+          <div className="flex items-center gap-1 flex-shrink-0 mt-0.5" style={{ minWidth: '40px' }}>
             {node.type === 'directory' ? (
               <div className="text-blue-600">📁</div>
             ) : (
               <FileIcon size={16} />
+            )}
+            {node.type === 'file' && node.indexed && (
+              <div 
+                className="text-green-600 text-xs font-bold" 
+                title="File indexed"
+              >
+                ✓
+              </div>
             )}
           </div>
           <div className="w-32 flex-shrink-0">
@@ -803,22 +818,24 @@ export function ProjectsDialog({
                           <CardContent className="space-y-4">
                             <div
                               className={cn(
-                                'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+                                'border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200',
                                 isDragOver
-                                  ? 'border-blue-500 bg-blue-50/50'
-                                  : 'border-gray-300 hover:border-gray-400',
+                                  ? 'border-blue-500 bg-blue-50/80 scale-105 shadow-lg'
+                                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50/50',
                               )}
                               onDragEnter={handleDragEnter}
                               onDragLeave={handleDragLeave}
                               onDragOver={handleDragOver}
                               onDrop={handleDrop}
                             >
-                              <div className="space-y-2">
-                                <FileIcon size={24} />
+                              <div className="flex flex-col items-center space-y-3">
+                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-dashed border-blue-300">
+                                  <UploadIcon size={28} />
+                                </div>
                                 <div>
-                                  <p className="text-sm font-medium">
+                                  <p className="text-sm font-medium text-gray-700">
                                     Drag and drop files here, or{' '}
-                                    <label className="text-blue-600 hover:text-blue-700 cursor-pointer">
+                                    <label className="text-blue-600 hover:text-blue-700 cursor-pointer underline">
                                       browse
                                       <input
                                         type="file"
@@ -830,9 +847,8 @@ export function ProjectsDialog({
                                       />
                                     </label>
                                   </p>
-                                  <p className="text-xs text-gray-500">
-                                    Select multiple files to upload to your
-                                    project
+                                  <p className="text-xs text-gray-500 mt-2">
+                                    Select multiple files to upload to your project
                                   </p>
                                 </div>
                               </div>

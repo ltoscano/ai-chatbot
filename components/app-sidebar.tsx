@@ -48,8 +48,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         
         const result = await response.json();
         setOpenMobile(false);
-        router.push(`/chat/${result.chatId}`);
-        router.refresh();
+        
+        // Always force a full page reload to refresh both chat content and sidebar history
+        window.location.href = `/chat/${result.chatId}`;
       } catch (error) {
         console.error('Error importing chat:', error);
         alert('Error importing chat. Please check the file format.');
