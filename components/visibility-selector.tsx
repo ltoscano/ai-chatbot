@@ -152,8 +152,9 @@ export function VisibilitySelector({
     setHubMenuOpen(false);
 
     // Salva la mappatura chatId -> projectId sul server
+    await syncProjectToServer(chatId, projectId);
+    
     if (projectId) {
-      await syncProjectToServer(chatId, projectId);
       toast({
         type: 'success',
         description: `Project selected: ${projectId}`,

@@ -108,7 +108,7 @@ function PureChatHeader({
             <TooltipContent>New Chat</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
+          {/* <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
@@ -120,9 +120,9 @@ function PureChatHeader({
               </Button>
             </TooltipTrigger>
             <TooltipContent>Download Chat</TooltipContent>
-          </Tooltip>
+          </Tooltip> */}
 
-          <Tooltip>
+          {/* <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
@@ -134,7 +134,7 @@ function PureChatHeader({
               </Button>
             </TooltipTrigger>
             <TooltipContent>Upload Chat</TooltipContent>
-          </Tooltip>
+          </Tooltip> */}
 
           <input
             ref={fileInputRef}

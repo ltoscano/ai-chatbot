@@ -452,8 +452,8 @@ export function ProjectsDialog({
     onProjectSelect(projectName);
     // Carica automaticamente i dettagli del progetto selezionato
     loadProjectDetails(projectName);
-    // Passa automaticamente al tab Files quando si seleziona un progetto
-    setActiveTab('files');
+    // Non passa automaticamente al tab Files - rimane nel tab corrente
+    // setActiveTab('files');
     // toast({
     //   type: 'success',
     //   description: `Project "${projectName}" selected`,

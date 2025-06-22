@@ -31,13 +31,16 @@ export function CurrentProjectProvider({ children }: { children: ReactNode }) {
     chatId: string,
     projectId: string | null,
   ) => {
-    if (!projectId || !session?.user?.id) return;
+    // if (!projectId || !session?.user?.id) return;
+    if (!session?.user?.id) return;
 
     try {
       const serverUrl =
         process.env.NEXT_PUBLIC_PROJECTS_URL_SERVER || 'http://localhost:8000';
-      const formData = new FormData();
-      formData.append('project_id', projectId);
+      const formData = new FormData();  
+      if (projectId) {
+        formData.append('project_id', projectId);
+      }
 
       const response = await fetch(
         `${serverUrl}/addProjectId/${session.user.id}/${chatId}`,
